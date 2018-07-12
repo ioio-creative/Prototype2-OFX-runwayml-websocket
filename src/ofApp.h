@@ -2,6 +2,8 @@
 
 #include "ofMain.h"
 #include "ofxOsc.h"
+#include "ofxJSON.h"
+
 
 #define RECEIVE_PORT 3334
 #define NUM_MSG_STRINGS 20
@@ -21,27 +23,15 @@ public:
     void keyPressed(int key);
     void keyReleased(int key);
     void mouseMoved(int x, int y);
-    void mouseDragged(int x, int y, int button);
-    void mousePressed(int x, int y, int button);
-    void mouseReleased(int x, int y, int button);
-    void mouseEntered(int x, int y);
-    void mouseExited(int x, int y);
-    void windowResized(int w, int h);
-    void dragEvent(ofDragInfo dragInfo);
-    void gotMessage(ofMessage msg);
-    
+
     ofVideoGrabber vidGrabber;
-    ofPixels videoInverted;
-    ofTexture videoTexture;
     int camWidth;
     int camHeight;
     
     
     bool record;
     
-    
-    
-    ofxOscReceiver receiver;
+    //ofxOscReceiver receiver;
     
     
     int current_msg_string;
@@ -52,14 +42,36 @@ public:
     string mouseButtonState;
     
     ofImage receivedImage;
-    
-    
-    
-    
-    
-    
+
     //ofxOscSender
     
     ofxOscSender sender;
+    
+    
+    
+    
+    
+    //osc Receiver
+    
+    
+    void drawParts();
+    void drawConnections();
+    
+    void getHumanFromOSC();
+    
+    ofxOscReceiver receiver;
+    
+    // This array will hold the results parsed from the OSC message string
+    ofxJSONElement results;
+    // This array will hold all the humans detected
+    ofxJSONElement humans;
+    
+    vector<vector<string>> connections;;
+    int width,height;
+    
+    
+    
+    
+    
 };
 

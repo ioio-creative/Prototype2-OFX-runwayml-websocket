@@ -20,31 +20,51 @@ void ofApp::setup(){
     vidGrabber.setDesiredFrameRate(60);
     vidGrabber.initGrabber(camWidth, camHeight);
     
-    videoInverted.allocate(camWidth, camHeight, OF_PIXELS_RGB);
-    videoTexture.allocate(videoInverted);
     ofSetVerticalSync(true);
     
     
     record = false;
     
+
+    //OSC SEND
+    
+    // open an outgoing connection to HOST:PORT
+    sender.setup(HOST, SEND_PORT);
     
     
-    
-    
-    //OSC
-    
+    //OSC RECEIVE
     cout << "listening for osc messages on port " << RECEIVE_PORT << "\n";
     receiver.setup(RECEIVE_PORT);
+    
+
     
     current_msg_string = 0;
     mouseX = 0;
     mouseY = 0;
     mouseButtonState = "";
     
-    
-    
-    // open an outgoing connection to HOST:PORT
-    sender.setup(HOST, SEND_PORT);
+    //      This are the pair of body connections we want to form.
+    //      Try creating new ones!
+    connections = {
+        {"Nose", "Left_Eye"},
+        {"Left_Eye", "Left_Ear"},
+        {"Nose", "Right_Eye"},
+        {"Right_Eye", "Right_Ear"},
+        {"Nose", "Neck"},
+        {"Neck", "Right_Shoulder"},
+        {"Neck", "Left_Shoulder"},
+        {"Right_Shoulder", "Right_Elbow"},
+        {"Right_Elbow", "Right_Wrist"},
+        {"Left_Shoulder", "Left_Elbow"},
+        {"Left_Elbow", "Left_Wrist"},
+        {"Neck", "Right_Hip"},
+        {"Right_Hip", "Right_Knee"},
+        {"Right_Knee", "Right_Ankle"},
+        {"Neck", "Left_Hip"},
+        {"Left_Hip", "Left_Knee"},
+        {"Left_Knee", "Left_Ankle"}
+    };
+
 }
 
 
@@ -63,10 +83,7 @@ void ofApp::update(){
     //ofSaveImage(pixels,ofToString(ofGetFrameNum())+".jpg");
             record = false;
         }
-        for(int i = 0; i < pixels.size(); i++){
-            videoInverted[i] = 255 - pixels[i];
-        }
-        videoTexture.loadData(videoInverted);
+
     }
     
     
@@ -81,6 +98,14 @@ void ofApp::update(){
         }
     }
     
+    
+    getHumanFromOSC();
+    
+   
+    
+}
+
+void ofApp::getHumanFromOSC(){
     // check for waiting messages
     while(receiver.hasWaitingMessages()){
         // get the next message
@@ -134,16 +159,30 @@ void ofApp::update(){
             msg_strings[current_msg_string] = "";
         }
         
+        
+        
+        /*
+         // get the next OSC message
+         ofxOscMessage m;
+         receiver.getNextMessage(m);
+         //        grab the data
+         string data = m.getArgAsString(0);
+         //        parse it to JSON
+         results.parse(data);
+         //        grab the humans
+         humans = results["results"]["humans"];
+         
+         */
+        
     }
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
     ofSetHexColor(0xffffff);
     vidGrabber.draw(20, 20);
-    videoTexture.draw(20 + camWidth, 20, camWidth, camHeight);
-    
+
     
     
     
@@ -167,6 +206,12 @@ void ofApp::draw(){
     for(int i = 0; i < NUM_MSG_STRINGS; i++){
         ofDrawBitmapString(msg_strings[i], 10, 40 + 15 * i);
     }
+    
+    
+    
+    //RUNWAY
+    drawParts();
+    drawConnections();
     
     
 
@@ -207,35 +252,57 @@ void ofApp::mouseMoved(int x, int y){
     m.addIntArg(y);
     sender.sendMessage(m, true);
 }
-//--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button){
+
+
+// FROM WEB SERVER
+
+
+// A function to draw humans body parts as circles
+void ofApp::drawParts(){
+    for(int h = 0; h < humans.size(); h++) {
+        ofxJSONElement human = humans[h];
+        // Now that we have one human, let's draw its body parts
+        for (int b = 0; b < human.size(); b++) {
+            ofxJSONElement body_part = human[b];
+            // Body parts are relative to width and weight of the input
+            float x = body_part[1].asFloat();
+            float y = body_part[2].asFloat();
+            ofDrawEllipse(x * width, y * height, 10, 10);
+        }
+    }
 }
 
-//--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button){
+// A function to draw connection between body parts
+void ofApp::drawConnections(){
+    for(int h = 0; h < humans.size(); h++) {
+        ofxJSONElement human = humans[h];
+        // Now that we have a human, let's draw its body
+        // connections start by looping through all body
+        // connections and matching only the ones we need.
+        for(int c = 0; c < connections.size(); c++){
+            ofxJSONElement start;
+            ofxJSONElement end;
+            // Check if we have a pair in the current body parts
+            for(int b = 0; b < human.size(); b++) {
+                ofxJSONElement body_part = human[b];
+                string name = body_part[0].asString();
+                if (name == connections[c][0]){
+                    start = body_part;
+                } else if (name == connections[c][1]){
+                    end = body_part;
+                }
+            }
+            if (start.size() > 0 && end.size() > 0){
+                float x1 = start[1].asFloat() * width;
+                float y1 = start[2].asFloat() * height;
+                float x2 = end[1].asFloat() * width;
+                float y2 = end[2].asFloat() * height;
+                ofDrawLine(x1, y1, x2, y2);
+            }
+        }
+    }
 }
 
-//--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button){
-}
 
-//--------------------------------------------------------------
-void ofApp::mouseEntered(int x, int y){
-}
 
-//--------------------------------------------------------------
-void ofApp::mouseExited(int x, int y){
-}
-
-//--------------------------------------------------------------
-void ofApp::windowResized(int w, int h){
-}
-
-//--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg){
-}
-
-//--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo){
-}
 
