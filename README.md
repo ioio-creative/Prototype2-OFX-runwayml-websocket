@@ -8,4 +8,4 @@ Multiple Camera -> Button Input -> Captured Image -> Refined Crop -> Skeleton Tr
     - 2.1 Select Openpose
     - 2.2 Input, HTTP, Output HTTP
     - 2.3 Connect
-3. npm i && npm start
+3. Open Terminal, go to root folder -> npm i && npm start
