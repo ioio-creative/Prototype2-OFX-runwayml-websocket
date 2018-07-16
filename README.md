@@ -5,7 +5,7 @@ Multiple Camera -> Button Input -> Captured Image -> Refined Crop -> Skeleton Tr
 
 1. Run Docker
 2. Run Runway ML
-    2.1 Select Openpose
-    2.2 Input, HTTP, Output HTTP
-    2.3 Connect
+    - 2.1 Select Openpose
+    - 2.2 Input, HTTP, Output HTTP
+    - 2.3 Connect
 3. npm i && npm start
