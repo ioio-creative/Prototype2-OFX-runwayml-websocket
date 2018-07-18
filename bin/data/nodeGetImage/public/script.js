@@ -30,14 +30,15 @@ var debug = false;
 
 
 var img;
-var w = 640;
-var h = 480;
+var w = 320;
+var h = 720;
 var colors;
 
 var s = "1.jpg";
 var x,
   y;
 
+//res.setHeader('Cache-Control','max-age=0, no-store, must-revalidate');
 // This are all the body connections we want to draw
 var bodyConnections = [
   [
@@ -164,6 +165,8 @@ function setup() {
 
 // Once the image has loaded,
 function sendImgToRunway() {
+  img.loadPixels();
+  updatePixels();
   // Draw the image to the canvas
   image(img, 0, 0);
   // Send the image to Runway and specify the model to use
@@ -217,7 +220,7 @@ function drawHuman(human) {
     }
   });
 }
-
+/*
 function keyReleased() {
 
   if (key === 'D') {
@@ -236,7 +239,7 @@ function keyReleased() {
 
   return false; // prevent any default behavior
 }
-
+*/
 //========== OSC ==========
 var socketOSC;
 
@@ -259,23 +262,34 @@ function setupOsc(oscPortIn, oscPortOut) {
     });
   });
   socketOSC.on('message', function(msg) {
+
     if (msg[0] == '#bundle') {
       for (var i = 2; i < msg.length; i++) {
         receiveOsc(msg[i][0], msg[i].splice(1));
-        sendOsc('/mouse/position', [x, y]);
+
+        //sendOsc('/mouse/position', [x, y]);
       }
     } else {
       receiveOsc(msg[0], msg.splice(1));
-      sendOsc('/mouse/position', [x, y]);
+      //sendOsc('/mouse/position', [x, y]);
     }
   });
 }
 
 function receiveOsc(address, value) {
+                    
   if (address == '/test') {
-    x = value[0];
-    y = value[1];
+    if (value[0] <= 18){
+      s = value[0] + ".jpg";
+      console.log(s);
+     }
   }
+  img = loadImage(s, sendImgToRunway);
+  img.loadPixels();
+  updatePixels();
+
+  return false;
+  //suppose I have to exe loadImage() here;
 }
 
 function sendOsc(address, value) {

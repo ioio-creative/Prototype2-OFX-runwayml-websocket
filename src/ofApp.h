@@ -48,9 +48,6 @@ public:
     ofxOscSender sender;
     
     
-    
-    
-    
     //osc Receiver
     
     
