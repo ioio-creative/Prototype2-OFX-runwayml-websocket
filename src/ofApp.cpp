@@ -248,7 +248,8 @@ void ofApp::mouseMoved(int x, int y){
     ofLog() << "send Mouse X : " << x;
     ofxOscMessage m;
     m.setAddress("/test");
-    m.addIntArg(x);
+    int xx = ofMap(x,0,ofGetWidth(),0,18);
+    m.addIntArg(xx);
     m.addIntArg(y);
     sender.sendMessage(m, true);
 }

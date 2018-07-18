@@ -165,12 +165,11 @@ function setup() {
 
 // Once the image has loaded,
 function sendImgToRunway() {
-  img.loadPixels();
-  updatePixels();
   // Draw the image to the canvas
   image(img, 0, 0);
   // Send the image to Runway and specify the model to use
   img.loadPixels();
+    updatePixels();
   socket.emit('update_request', {
     data: img.canvas.toDataURL('image/jpeg'),
     model: "mobilenet_thin"
@@ -178,7 +177,7 @@ function sendImgToRunway() {
 }
 
 function draw() {
-  background(255, 204, 0);
+  //background(255, 204, 0);
 
   if (debug) {
     fill(0, 255, 0);
@@ -186,8 +185,8 @@ function draw() {
     fill(0);
     text("I'm p5.js", x - 25, y);
   } else {
-    image(img, 0, 0);
-    updatePixels();
+    //image(img, 0, 0);
+    //updatePixels();
 
     if (humans.length > 0) {
       humans.forEach(human => drawHuman(human));
@@ -277,17 +276,16 @@ function setupOsc(oscPortIn, oscPortOut) {
 }
 
 function receiveOsc(address, value) {
-                    
+
   if (address == '/test') {
     if (value[0] <= 18){
-      s = value[0] + ".jpg";
+      s = value[0] + ".jpg" + "?=" + Math.random();
       console.log(s);
      }
   }
   img = loadImage(s, sendImgToRunway);
-  img.loadPixels();
-  updatePixels();
 
+  //location.reload();  // LAUHO -> this will force browser to reload
   return false;
   //suppose I have to exe loadImage() here;
 }
